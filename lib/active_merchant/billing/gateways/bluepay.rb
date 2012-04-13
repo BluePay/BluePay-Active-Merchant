@@ -54,26 +54,26 @@ module ActiveMerchant #:nodoc:
       #   or a token. The token is called the Master ID. This is a unique transaction ID returned from a previous transaction. This token associates all the stored information for a previous transaction.
       # * <tt>options</tt> -- A hash of optional parameters.
       def authorize(money, payment_object, options = {})
-	post = {}
-	post[:MASTER_ID] = ''
-	if payment_object != nil && payment_object.class() != String
-	  payment_object.class() == ActiveMerchant::Billing::Check ?
+       	post = {}
+       	post[:MASTER_ID] = ''
+       	if payment_object != nil && payment_object.class() != String
+       	  payment_object.class() == ActiveMerchant::Billing::Check ?
           add_check(post, payment_object) :
           add_creditcard(post, payment_object)
-	else
-	  post[:MASTER_ID] = payment_object
-	end
-	add_invoice(post, options)
+       	else
+       	  post[:MASTER_ID] = payment_object
+       	end
+       	add_invoice(post, options)
         add_address(post, options)
         add_customer_data(post, options)
-	if options[:rebill]     != nil
+       	if options[:rebill]     != nil
           post[:DO_REBILL]       = '1'
           post[:REB_AMOUNT]      = amount(options[:rebill_amount])
           post[:REB_FIRST_DATE]  = options[:rebill_start_date]
           post[:REB_EXPR]        = options[:rebill_expression]
           post[:REB_CYCLES]      = options[:rebill_cycles]
         end
-	post[:TRANS_TYPE]  = 'AUTH'
+       	post[:TRANS_TYPE]  = 'AUTH'
         commit('AUTH_ONLY', money, post)
       end
 
@@ -89,26 +89,26 @@ module ActiveMerchant #:nodoc:
       #   or a token. The token is called the Master ID. This is a unique transaction ID returned from a previous transaction. This token associates all the stored information for a previous transaction.
       # * <tt>options</tt> -- A hash of optional parameters.,
       def purchase(money, payment_object, options = {})
-	post = {}
-	post[:MASTER_ID] = ''
-	if payment_object != nil && payment_object.class() != String
-	 payment_object.class() == ActiveMerchant::Billing::Check ? 
-	 add_check(post, payment_object) :
-	 add_creditcard(post, payment_object) 
-	else
-	  post[:MASTER_ID] = payment_object
-	end
-	add_invoice(post, options)
+       	post = {}
+       	post[:MASTER_ID] = ''
+       	if payment_object != nil && payment_object.class() != String
+       	 payment_object.class() == ActiveMerchant::Billing::Check ? 
+       	 add_check(post, payment_object) :
+       	 add_creditcard(post, payment_object) 
+       	else
+       	  post[:MASTER_ID] = payment_object
+       	end
+       	add_invoice(post, options)
         add_address(post, options)
         add_customer_data(post, options)
-	if options[:rebill]     != nil
-	  post[:DO_REBILL]       = '1'
-	  post[:REB_AMOUNT]      = amount(options[:rebill_amount])
+       	if options[:rebill]     != nil
+       	  post[:DO_REBILL]       = '1'
+       	  post[:REB_AMOUNT]      = amount(options[:rebill_amount])
           post[:REB_FIRST_DATE]  = options[:rebill_start_date]
           post[:REB_EXPR]        = options[:rebill_expression]
           post[:REB_CYCLES]      = options[:rebill_cycles]
         end
-	post[:TRANS_TYPE]  = 'SALE'
+       	post[:TRANS_TYPE]  = 'SALE'
         commit('AUTH_CAPTURE', money, post)
       end
 
@@ -120,11 +120,11 @@ module ActiveMerchant #:nodoc:
       # * <tt>money</tt> -- The amount to be captured as an Integer value in cents.
       # * <tt>identification</tt> -- The Master ID, or token, returned from the previous authorize transaction.
       def capture(money, identification, options = {})
-	post = {}
-	add_address(post, options)
-	add_customer_data(post, options)
+       	post = {}
+       	add_address(post, options)
+       	add_customer_data(post, options)
         post[:MASTER_ID] = identification
-	post[:TRANS_TYPE] = 'CAPTURE'
+       	post[:TRANS_TYPE] = 'CAPTURE'
         commit('PRIOR_AUTH_CAPTURE', money, post)
       end
 
@@ -135,9 +135,9 @@ module ActiveMerchant #:nodoc:
       #
       # * <tt>identification</tt> - The Master ID, or token, returned from a previous authorize transaction.
       def void(identification, options = {})
-	post = {}
+       	post = {}
         post[:MASTER_ID] = identification
-	post[:TRANS_TYPE] = 'VOID'
+       	post[:TRANS_TYPE] = 'VOID'
         commit('VOID', nil, post)
       end
 
@@ -156,16 +156,16 @@ module ActiveMerchant #:nodoc:
       #   If the payment_object is either a CreditCard or Check object, then the transaction type will be an unmatched credit placing funds in the specified account. This is referred to a CREDIT transaction in BluePay.
       # * <tt>options</tt> -- A hash of parameters.
       def refund(money, payment_object, options = {})
-	post = {}
-	post[:PAYMENT_ACCOUNT] = ''
+       	post = {}
+       	post[:PAYMENT_ACCOUNT] = ''
         if payment_object != nil && payment_object.class() != String
            payment_object.class() == ActiveMerchant::Billing::Check ?
            add_check(post, payment_object) :
            add_creditcard(post, payment_object)
-	   post[:TRANS_TYPE] = 'CREDIT'
+       	   post[:TRANS_TYPE] = 'CREDIT'
         else
-           post[:MASTER_ID]             = payment_object
-	   post[:TRANS_TYPE] = 'REFUND'
+           post[:MASTER_ID]  = payment_object
+       	   post[:TRANS_TYPE] = 'REFUND'
         end
 
         options[:first_name] ? post[:NAME1] = options[:first_name] : post[:NAME1] = ''
@@ -215,7 +215,7 @@ module ActiveMerchant #:nodoc:
       #   A money object of 1995 cents would be passed into the 'money' parameter.
       def recurring(money, payment_object, options = {})
         requires!(options, :rebill_start_date, :rebill_expression)
-	options[:rebill] = '1'
+       	options[:rebill] = '1'
         money == nil ? authorize(money, payment_object, options) :
         purchase(money, payment_object, options)
       end
@@ -228,7 +228,7 @@ module ActiveMerchant #:nodoc:
       #
       # * <tt>rebill_id</tt> -- A string containing the rebill_id of the recurring billing that is already active (REQUIRED)
       def status_recurring(rebill_id)
-	post = {}
+       	post = {}
         requires!(rebill_id)
         post[:REBILL_ID] = rebill_id
         post[:TRANS_TYPE] = 'GET'
@@ -249,16 +249,16 @@ module ActiveMerchant #:nodoc:
       # * <tt>:rebill_next_amount</tt> -- A string containing the next rebilling amount to charge the customer. This ONLY affects the next scheduled charge; all other rebillings will continue at the regular (rebill_amount) amount.
       #   Take a look above at the recurring_payment method for similar examples on how to use.
       def update_recurring(options = {})
-	post = {}
-	requires!(options, :rebill_id)
-	post[:REBILL_ID]          = options[:rebill_id]
-	post[:TRANS_TYPE]         = 'SET'
+       	post = {}
+       	requires!(options, :rebill_id)
+       	post[:REBILL_ID]          = options[:rebill_id]
+       	post[:TRANS_TYPE]         = 'SET'
         post[:REB_AMOUNT]         = amount(options[:rebill_amount]) if !options[:rebill_amount].nil?
         post[:NEXT_DATE]          = options[:rebill_next_date] if !options[:rebill_next_date].nil?
         post[:REB_EXPR]           = options[:rebill_expression] if !options[:rebill_expression].nil?
         post[:REB_CYCLES]     	  = options[:rebill_cycles] if !options[:rebill_cycles].nil?
-	post[:NEXT_AMOUNT]        = options[:rebill_next_amount] if !options[:rebill_next_amount].nil?
-	commit('rebill', 'nil', post)	
+       	post[:NEXT_AMOUNT]        = options[:rebill_next_amount] if !options[:rebill_next_amount].nil?
+       	commit('rebill', 'nil', post)	
       end
 
       # Cancel a recurring payment.
@@ -269,11 +269,11 @@ module ActiveMerchant #:nodoc:
       #
       # * <tt>rebill_id</tt> -- A string containing the rebill_id of the recurring billing that you wish to cancel/stop (REQUIRED)
       def cancel_recurring(rebill_id)
-	post = {}
+       	post = {}
         requires!(rebill_id)
         post[:REBILL_ID]         = rebill_id
         post[:TRANS_TYPE]        = 'SET'
-	post[:STATUS]            = 'stopped'
+       	post[:STATUS]            = 'stopped'
         commit('rebill', 'nil', post)
       end
 
@@ -281,24 +281,24 @@ module ActiveMerchant #:nodoc:
       
       def commit(action, money, fields)
         fields[:AMOUNT] = amount(money) unless (fields[:TRANS_TYPE] == 'VOID' or action == 'rebill')
-	test? == true || @options[:test] == true ? fields[:MODE] = 'TEST' : fields[:MODE] = 'LIVE'
-	action == 'rebill' ? begin url = rebilling_url; fields[:TAMPER_PROOF_SEAL] = calc_rebill_tps(fields) end : begin url = live_url; fields[:TAMPER_PROOF_SEAL] = calc_tps(amount(money), fields) end
+       	test? == true || @options[:test] == true ? fields[:MODE] = 'TEST' : fields[:MODE] = 'LIVE'
+       	action == 'rebill' ? begin url = rebilling_url; fields[:TAMPER_PROOF_SEAL] = calc_rebill_tps(fields) end : begin url = live_url; fields[:TAMPER_PROOF_SEAL] = calc_tps(amount(money), fields) end
         fields[:ACCOUNT_ID] = @options[:login]
         data = ssl_post url, post_data(action, fields)
         response = parse(data)
         message = message_from(response)
-	test_mode = test? || fields[:MODE] == 'TEST'
-	if (response.has_key?('TRANS_ID'))
+       	test_mode = test? || fields[:MODE] == 'TEST'
+       	if (response.has_key?('TRANS_ID'))
        	  response_id = response['TRANS_ID'].to_s()
-	elsif (response.has_key?('rebill_id'))
-	  response_id = response['rebill_id'].to_s()
-	else
-	  response_id = response[TRANSACTION_ID]
-	end
-	response.has_key?('AVS') ? avs = response['AVS'] : avs = ''
-	response[AVS_RESULT_CODE] != '' ? avs = response[AVS_RESULT_CODE] : avs = ''
-	response.has_key?('CVV2') ? cvv2 = response['CVV2'] : cvv2 = ''
-	response[CARD_CODE_RESPONSE_CODE] != '' ? cvv2 = response[CARD_CODE_RESPONSE_CODE] : cvv2 = ''
+       	elsif (response.has_key?('rebill_id'))
+       	  response_id = response['rebill_id'].to_s()
+       	else
+       	  response_id = response[TRANSACTION_ID]
+       	end
+       	response.has_key?('AVS') ? avs = response['AVS'] : avs = ''
+       	response[AVS_RESULT_CODE] != '' ? avs = response[AVS_RESULT_CODE] : avs = ''
+       	response.has_key?('CVV2') ? cvv2 = response['CVV2'] : cvv2 = ''
+       	response[CARD_CODE_RESPONSE_CODE] != '' ? cvv2 = response[CARD_CODE_RESPONSE_CODE] : cvv2 = ''
         Response.new(success?(response), message, response,
           :test          => test_mode,
           :authorization => response_id,
@@ -310,7 +310,7 @@ module ActiveMerchant #:nodoc:
 
       def success?(response)
        	response['STATUS'] == '1' || response[:response_code].to_s() == '1' || 
-	response.has_key?('rebill_id') || response[RESPONSE_REASON_TEXT] =~ /approved/ 
+       	response.has_key?('rebill_id') || response[RESPONSE_REASON_TEXT] =~ /approved/ 
       end
 
       def fraud_review?(response)
@@ -322,37 +322,37 @@ module ActiveMerchant #:nodoc:
       end
      
       def parse(body)
-	fields = CGI::parse(body)
-	if fields.has_key?('MESSAGE') or fields.has_key?('rebill_id')
-	  if fields.has_key?('MESSAGE')
-  	    fields['MESSAGE'].to_s() == "Missing ACCOUNT_ID" ? message = "The merchant login ID or password is invalid" : message = fields['MESSAGE']
-	    fields['MESSAGE'].to_s() =~ /Approved/ ? message = "This transaction has been approved" : message = fields['MESSAGE'] if message == fields['MESSAGE']
-	    fields['MESSAGE'].to_s() =~ /Expired/ ? message = "The credit card has expired" : message = fields['MESSAGE'] if message == fields['MESSAGE']
-	    fields.delete('MESSAGE')
-	  end
-	  fields.has_key?('STATUS') ? begin status = fields['STATUS']; fields.delete('STATUS') end : status = ''
-	  fields.has_key?('AVS') ? begin avs = fields['AVS']; fields.delete('AVS') end : avs = ''
-	  fields.has_key?('CVV2') ? begin cvv2 = fields['CVV2']; fields.delete('CVV2') end : cvv2 = ''
-	  fields.has_key?('MASTER_ID') ? begin trans_id = fields['MASTER_ID']; fields.delete('MASTER_ID') end : trans_id = ''
-	  fields[:avs_result_code] = avs
-	  fields[:card_code] = cvv2
-	  fields[:response_code] = status
-	  fields[:response_reason_code] = ''
-	  fields[:response_reason_text] = message
+       	fields = CGI::parse(body)
+       	if fields.has_key?('MESSAGE') or fields.has_key?('rebill_id')
+       	  if fields.has_key?('MESSAGE')
+       	    fields['MESSAGE'].to_s() == "Missing ACCOUNT_ID" ? message = "The merchant login ID or password is invalid" : message = fields['MESSAGE']
+       	    fields['MESSAGE'].to_s() =~ /Approved/ ? message = "This transaction has been approved" : message = fields['MESSAGE'] if message == fields['MESSAGE']
+       	    fields['MESSAGE'].to_s() =~ /Expired/ ? message = "The credit card has expired" : message = fields['MESSAGE'] if message == fields['MESSAGE']
+       	    fields.delete('MESSAGE')
+       	  end
+       	  fields.has_key?('STATUS') ? begin status = fields['STATUS']; fields.delete('STATUS') end : status = ''
+       	  fields.has_key?('AVS') ? begin avs = fields['AVS']; fields.delete('AVS') end : avs = ''
+       	  fields.has_key?('CVV2') ? begin cvv2 = fields['CVV2']; fields.delete('CVV2') end : cvv2 = ''
+       	  fields.has_key?('MASTER_ID') ? begin trans_id = fields['MASTER_ID']; fields.delete('MASTER_ID') end : trans_id = ''
+       	  fields[:avs_result_code] = avs
+       	  fields[:card_code] = cvv2
+       	  fields[:response_code] = status
+       	  fields[:response_reason_code] = ''
+       	  fields[:response_reason_text] = message
 	  fields[:transaction_id] = trans_id
-	  return fields
-	end 
-	# Authorize.net response
-	hash = Hash.new
+       	  return fields
+       	end 
+       	# Authorize.net response
+       	hash = Hash.new
         fields = fields.first[0].split(",")
-	fields.each_index do |x|
-	  hash[x] = fields[x].tr('$','')
-	end
-	hash
+       	fields.each_index do |x|
+       	  hash[x] = fields[x].tr('$','')
+       	end
+       	hash
       end
 
       def add_invoice(post, options)
-	post[:ORDER_ID]	   = options[:order_id] if options.has_key? :order_id
+       	post[:ORDER_ID]	   = options[:order_id] if options.has_key? :order_id
         post[:INVOICE_ID]  = options[:invoice] if options.has_key? :invoice
         post[:invoice_num] = options[:order_id] if options.has_key? :order_id
         post[:MEMO]        = options[:description] if options.has_key? :description
@@ -360,7 +360,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def add_creditcard(post, creditcard)
-	post[:PAYMENT_TYPE]    = 'CREDIT'
+       	post[:PAYMENT_TYPE]    = 'CREDIT'
         post[:PAYMENT_ACCOUNT] = creditcard.number
         post[:CARD_CVV2]       = creditcard.verification_value if 
                               creditcard.verification_value?
@@ -370,25 +370,24 @@ module ActiveMerchant #:nodoc:
       end
 
       def add_check(post, check)
-	post[:PAYMENT_TYPE]     = 'ACH'
-	post[:PAYMENT_ACCOUNT]  = check.account_type + ":" + check.routing_number + ":" + check.account_number
-	post[:NAME1]            = check.first_name
-	post[:NAME2]            = check.last_name 
+       	post[:PAYMENT_TYPE]     = 'ACH'
+       	post[:PAYMENT_ACCOUNT]  = check.account_type + ":" + check.routing_number + ":" + check.account_number
+       	post[:NAME1]            = check.first_name
+       	post[:NAME2]            = check.last_name 
       end
 
       def add_customer_data(post, options)
           post[:EMAIL]     = options[:email] if options.has_key? :email
-	  post[:CUSTOM_ID] = options[:customer] if options.has_key? :customer
+       	  post[:CUSTOM_ID] = options[:customer] if options.has_key? :customer
       end
 
       def add_duplicate_window(post)
         unless duplicate_window.nil?
           post[:duplicate_window] = duplicate_window
-	  post[:DUPLICATE_OVERRIDE] = duplicate_window
+       	  post[:DUPLICATE_OVERRIDE] = duplicate_window
         end
       end
 
-      
       def add_address(post, options)
 	if address = options[:billing_address] || options[:address]
 	  post[:NAME1]	      = address[:first_name]
@@ -414,7 +413,6 @@ module ActiveMerchant #:nodoc:
           post[:COUNTRY]      = address[:country]
           post[:STATE]        = address[:state].blank?  ? 'n/a' : address[:state] 
         end
-
       end
 
       def post_data(action, parameters = {})
@@ -449,7 +447,6 @@ module ActiveMerchant #:nodoc:
 	  return results[RESPONSE_REASON_TEXT] ? results[RESPONSE_REASON_TEXT].chomp('.') : ''
 	end
 	end	
-
 
       def expdate(creditcard)
         year  = sprintf("%.4i", creditcard.year)
